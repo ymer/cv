@@ -1,127 +1,147 @@
 ---
-title: "Nick Strayer's CV"
-author: Nick Strayer
+title: "Jonatan Pallesen CV"
+author: Jonatan Pallesen
 date: "`r Sys.Date()`"
 output:
   pagedown::html_resume:
     css: ['css/styles.css', 'resume']
-    # set it to true for a self-contained HTML page but it'll take longer to render
     self_contained: true
 ---
 
 ```{r, include=FALSE}
-knitr::opts_chunk$set(
-  results='asis', 
-  echo = FALSE
-)
+knitr::opts_chunk$set(results='asis', echo = F, message = F, warning = F)
 
 library(glue)
 library(tidyverse)
-
-# Set this to true to have links turned into footnotes at the end of the document
-PDF_EXPORT <- FALSE
-
-# Holds all the links that were inserted for placement at the end
-links <- c()
-
-source('parsing_functions.R')
-
-# Load csv with position info
-position_data <- read_csv('positions.csv')
 ```
 
+```{r, warning = F, message = F}
+position_data <- read_csv('positions.csv')
 
-```{r}
-# When in export mode the little dots are unaligned, so fix that. 
-if(PDF_EXPORT){
-  cat("
-  <style>
-  :root{
-    --decorator-outer-offset-left: -6.5px;
-  }
-  </style>")
+section_id <- "education"
+
+print_section <- function(position_data, section_id){
+  position_data %>% 
+    filter(section == section_id) %>% 
+    arrange(desc(end)) %>% 
+    mutate(id = 1:n()) %>% 
+    pivot_longer(
+      starts_with('description'),
+      names_to = 'description_num',
+      values_to = 'description'
+    ) %>% 
+    filter(!is.na(description) | description_num == 'description_1') %>%
+    group_by(id) %>% 
+    mutate(
+      descriptions = list(description),
+      no_descriptions = is.na(first(description))
+    ) %>% 
+    ungroup() %>% 
+    filter(description_num == 'description_1') %>% 
+    mutate(
+      timeline = ifelse(
+        is.na(start) | start == end,
+        end,
+        glue('{end} - {start}')
+      ),
+      description_bullets = ifelse(
+        no_descriptions,
+        ' ',
+        map_chr(descriptions, ~paste('-', ., collapse = '\n'))
+      )
+    ) %>% 
+    mutate_all(~ifelse(is.na(.), 'N/A', .)) %>% 
+    glue_data(
+      "### {title}",
+      "\n\n",
+      "{loc}",
+      "\n\n",
+      "{institution}",
+      "\n\n",
+      "{timeline}", 
+      "\n\n",
+      "{description_bullets}",
+      "\n\n\n",
+    )
 }
 ```
+
+
+
 
 
 Aside
 ================================================================================
 
 
-![logo](beta_dist.png){width=100%}
+![logo](logo.png){width=100%}
+
+<i class="fa fa-envelope"></i> jonatan.smp@gmail.com\
+<i class="fa fa-twitter"></i> [jonatanpallesen](https://twitter.com/jonatanpallesen)\
+<i class="fa fa-github"></i> [github.com/ymer](https://github.com/ymer)\
+<i class="fa fa-link"></i> [jsmp.dk](https://jsmp.dk/)
+
+<br>
 
 ```{r}
-# When in export mode the little dots are unaligned, so fix that. 
-if(PDF_EXPORT){
-  cat("View this CV online with links at _nickstrayer.me/cv_")
-} else {
-  cat("[<i class='fas fa-download'></i> Download a PDF of this CV](https://github.com/nstrayer/cv/raw/master/strayer_cv.pdf)")
-}
-```
-
-Contact {#contact}
---------------------------------------------------------------------------------
-
-
-- <i class="fa fa-envelope"></i> nick.strayer@gmail.com
-- <i class="fa fa-twitter"></i> NicholasStrayer
-- <i class="fa fa-github"></i> github.com/nstrayer
-- <i class="fa fa-link"></i> [nickstrayer.me](http://nickstrayer.me/)
-- <i class="fa fa-phone"></i> (734) 645-0110
-
-
-
-Language Skills {#skills}
---------------------------------------------------------------------------------
-
-```{r}
-skills <- tribble(
-  ~skill,               ~level,
-  "R",                  5,
-  "Javascript (d3.js)", 4.5,
-  "Python",             4,
-  "Bash",               3.5,
-  "SQL",                3,
-  "C++",                3,
-  "AWK",                3
-)
-
-build_skill_bars(skills)
+cat("[<i class='fas fa-download'></i> Download a PDF of this CV](https://jsmp.dk/cv/cv.pdf)")
+#cat("View this CV as HTML at _jsmp.dk/cv_")
 ```
 
 
 
 
 
-Disclaimer {#disclaimer}
+
+
+Skills {#skills}
 --------------------------------------------------------------------------------
 
-Made with the R package [**pagedown**](https://github.com/rstudio/pagedown). 
+*Programming languages*
 
-The source code is available at [github.com/nstrayer/cv](https://github.com/nstrayer/cv).
+- R 
+- Python
+- Julia
 
-Last updated on `r Sys.Date()`.
+*Packages*
 
+- Visualization\
+  - (ggplot, shiny, matplotlib)
 
+- Data science, R\
+  - (tidyverse, tidymodels, caret, rmarkdown )
+  
+- Data science, Python\
+  - (pandas, scikit-learn, tensorflow, statsmodels)
+
+*Other*
+
+- Github
+- SQL
+- Unix / bash
 
 
 Main
 ================================================================================
 
-Nick Strayer {#title}
+Jonatan Pallesen {#title}
 --------------------------------------------------------------------------------
 
+I am a data scientist with a PhD in genomics. I'm curious by nature, and enjoy the challenge of separating signal from noise to gain real insights.
+
+Throughout my education and work I have acquired extensive theoretical and practical experience with data handling, statistics, machine learning, visualization and algorithms. I am a very skilled programmer in Python, R and Julia, with more than ten years of experience in the former two.
+
+During my work as statistical analyst and as data scientist I have worked on a variety of different projects, for which I have been in charge of all stages of the analysis, from problem definition, data cleaning and quality control, to statistical analysis, model building and presentation.
+
+
+Work Experience {data-icon=laptop}
+--------------------------------------------------------------------------------
 
 ```{r}
-intro_text <- "I have made [visualizations viewed by hundreds of thousands of people](https://www.nytimes.com/interactive/2016/08/26/us/college-student-migration.html), [sped up query times for 25 terabytes of data by an average of 4,800 times](https://livefreeordichotomize.com/2019/06/04/using_awk_and_r_to_parse_25tb/), and built [packages for R](https://github.com/nstrayer/shinysense) that let you [do magic](http://nickstrayer.me/dataDayTexas/).
-
-Currently searching for a data science position that allows me to build tools using visualization and machine learning to help people explore and understand their data. 
-"
-
-cat(sanitize_links(intro_text))
+print_section(position_data, 'work')
 ```
 
-
+<br>
 
 Education {data-icon=graduation-cap data-concise=true}
 --------------------------------------------------------------------------------
@@ -130,50 +150,21 @@ Education {data-icon=graduation-cap data-concise=true}
 print_section(position_data, 'education')
 ```
 
+</div>
+</div>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<div>
+<div>
 
-
-Research Experience {data-icon=laptop}
---------------------------------------------------------------------------------
-
-```{r}
-print_section(position_data, 'research_positions')
-```
-
-
-
-Industry Experience {data-icon=suitcase}
---------------------------------------------------------------------------------
-
-::: aside
-I have worked in a variety of roles ranging from journalist to software engineer to data scientist. I like collaborative environments where I can learn from my peers. 
-:::
-
-```{r}
-print_section(position_data, 'industry_positions')
-```
-
-<br>
-<br>
-<br>
-
-Teaching Experience {data-icon=chalkboard-teacher}
---------------------------------------------------------------------------------
-
-::: aside
-I am passionate about education. I believe that no topic is too complex if the teacher is empathetic and willing to think about new methods of approaching task. 
-:::
-
-```{r}
-print_section(position_data, 'teaching_positions')
-```
-
-
-Selected Data Science Writing {data-icon=chart-line}
+Selected public data science projects {data-icon=chart-line}
 --------------------------------------------------------------------------------
 
 
 ::: aside
-I regularly blog about data science and visualization on my blog [LiveFreeOrDichotomize.](https://livefreeordichotomize.com/)
+I regularly make new analyses and visualizations on [my blog](https://jsmp.dk/)
 :::
 
 ```{r}
@@ -181,51 +172,14 @@ print_section(position_data, 'data_science_writings')
 ```
 
 
+<br>
 
-Selected Press (About)  {data-icon=newspaper}
---------------------------------------------------------------------------------
-
-```{r}
-print_section(position_data, 'about_me_press')
-```
-
-
-
-Selected Press (By)  {data-icon=newspaper}
---------------------------------------------------------------------------------
-
-```{r}
-print_section(position_data, 'by_me_press')
-```
-
-
-
-
-Selected Publications, Posters, and Talks {data-icon=book}
+Selected Publications {data-icon=book}
 --------------------------------------------------------------------------------
 
 ```{r}
 print_section(position_data, 'academic_articles')
 ```
 
-
-
-```{r}
-if(PDF_EXPORT){
-  cat("
-  
-Links {data-icon=link}
---------------------------------------------------------------------------------
-
-<br>
-
-
-")
-  
-  walk2(links, 1:length(links), function(link, index){
-    print(glue('{index}. {link}'))
-  })
-}
-```
 
 
